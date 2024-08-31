@@ -112,25 +112,41 @@ def align_sequences(seq1, seq2, alignment_type="global"):
 
 # Phylogenetic Tree Construction
 
-
 def construct_phylogenetic_tree(gene_sequences):
-    tree = Tree()  # Create a tree with no initial structure
+    # Check if gene_sequences dictionary is not empty
+    if not gene_sequences:
+        print("No gene sequences provided.")
+        return
+
+    # Initialize the tree with a dummy root node if needed
+    tree = Tree()  # An empty tree
+    root = tree.add_child(name="Root")  # Adding a root node
+
     for species, sequence in gene_sequences.items():
-        # Add a child node for each species with dummy distance
-        tree.add_child(name=species, dist=len(sequence))
+        if sequence:  # Ensure there is a sequence to process
+            # Add child with the species name and a dummy branch length based on sequence length
+            root.add_child(name=species, dist=len(sequence))
+        else:
+            print(f"No valid sequence for {species}")
 
-    # Create a TreeStyle object
+    # Set up tree display style
     ts = TreeStyle()
-    ts.show_leaf_name = True  # Display leaf names
-    ts.show_branch_support = True  # Optionally show branch support values
+    ts.show_leaf_name = True
+    ts.show_branch_length = True
+    ts.show_branch_support = True
 
-    # Set styles for nodes
     nstyle = NodeStyle()
-    nstyle["size"] = 10
-    for node in tree.traverse():
-        node.set_style(nstyle)
+    nstyle["size"] = 0  # No dots at the nodes
+    nstyle["vt_line_color"] = "#0000aa"
+    nstyle["hz_line_color"] = "#0000aa"
+    nstyle["vt_line_width"] = 2
+    nstyle["hz_line_width"] = 2
+    nstyle["vt_line_type"] = 0  # 0 solid, 1 dashed, 2 dotted
+    nstyle["hz_line_type"] = 0
 
-    # Render the tree
+    for n in tree.traverse():
+        n.set_style(nstyle)
+
     tree.show(tree_style=ts)
 
 # Machine Learning for Variant Impact Prediction
