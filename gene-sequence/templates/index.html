@@ -22,7 +22,18 @@
         <div id="geneGrid" class="ag-theme-alpine" style="height: 200px; width: 1000px"></div>
         <h2>Exon Locations</h2>
         {% if plot_url %}
-            <img src="data:image/png;base64,{{ plot_url }}" alt="Exon Locations">
+        <img src="data:image/png;base64,{{ plot_url }}" alt="Exon Locations">
+        {% endif %}
+        {% if variant_plot_url %}
+        <h2>Variant Graph</h2>
+        <img src="data:image/png;base64,{{ variant_plot_url }}" alt="Variant Graph">
+        {% if selected_variant %}
+            <h3>Selected Variant</h3>
+            <p>ID: {{ selected_variant.id }}</p>
+            <p>Location: {{ selected_variant.location }}</p>
+            <p>Allele: {{ selected_variant.allele }}</p>
+            <p>Consequence: {{ selected_variant.consequence }}</p>
+        {% endif %}
         {% endif %}
     {% endif %}
     <script>
