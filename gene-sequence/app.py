@@ -49,7 +49,7 @@ def plot_exon_locations(gene_info, gene_sequence):
             exon_start = exon['start'] - gene_info['start']
             exon_length = exon['end'] - exon['start'] + 1
             ax.add_patch(Rectangle((exon_start, 0.5), exon_length,
-                         0.5, edgecolor='black', facecolor='blue'))
+                         0.5, edgecolor='blue', facecolor='pink'))
 
     ax.set_xlim(0, len(gene_sequence))
     ax.set_ylim(0, 1)
