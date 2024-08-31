@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gene Analysis</title>
+</head>
+<body>
+    <h1>Gene Analysis Form</h1>
+    <form method="POST" action="/">
+        <label for="gene_name">Gene Name:</label>
+        <input type="text" id="gene_name" name="gene_name" required><br><br>
+
+        <label for="species_list">Species List (comma-separated):</label>
+        <input type="text" id="species_list" name="species_list" required><br><br>
+
+        <label for="alignment_type">Alignment Type:</label>
+        <select id="alignment_type" name="alignment_type">
+            <option value="global">Global</option>
+            <option value="local">Local</option>
+        </select><br><br>
+
+        <label for="consequence_type">Consequence Type:</label>
+        <input type="text" id="consequence_type" name="consequence_type"><br><br>
+
+        <label for="clinical_significance">Clinical Significance:</label>
+        <input type="text" id="clinical_significance" name="clinical_significance"><br><br>
+
+        <input type="submit" value="Submit">
+    </form>
+</body>
+</html>
