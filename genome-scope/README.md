@@ -18,7 +18,7 @@ Before running GenomeScope, you will need to set up your environment. Here's how
    ```bash
    git clone https://github.com/aarushm4/ee282.git
    
-   cd genomescope
+   cd ee282/genomescope
 2. **Set up a Python Virtual Environment (recommended)**
    
    ```bash
