@@ -17,27 +17,37 @@ Before running GenomeScope, you will need to set up your environment. Here's how
 
    ```bash
    git clone https://github.com/yourusername/genomescope.git
+   
    cd genomescope
-
 2. **Set up a Python Virtual Environment (recommended)**
-
-  python -m venv venv
-  source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-3. **Install Required Packages**
-
+   
+   ```bash
+   python -m venv venv
+   
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
+4. **Install Required Packages**
+   ```bash
    pip install -r requirements.txt
-4. **Initialize the Database Run the following script to create your SQLite database and tables:**
+   
+5. **Initialize the Database Run the following script to create your SQLite database and tables:**
+   
+   ```bash
    python database_setup.py
-5. **Import Data Make sure to have a .csv file with variant data ready (formatted according to the ClinVar database schema):**
-  python data_import.py --file path_to_your_clinvar_data.csv
+   
+6. **Import Data Make sure to have a .csv file with variant data ready (formatted according to the ClinVar database schema):**
+   
+   ```bash
+   ython data_import.py --file path_to_your_clinvar_data.csv
 
 ## Usage
 
 Once the installation is complete, you can start the server:
-  
-  python app.py
+```bash
+python app.py
+```
 
-Navigate to <http://127.0.0.1:5000/> in your web browser to access GenomeScope.
+**Navigate to <http://127.0.0.1:5000/> in your web browser to access GenomeScope.**
 
 ## Uploading Data
 
