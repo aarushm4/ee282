@@ -38,7 +38,7 @@ Before running GenomeScope, you will need to set up your environment. Here's how
 6. **Import Data Make sure to have a .csv file with variant data ready (formatted according to the ClinVar database schema):**
    
    ```bash
-   ython data_import.py --file path_to_your_clinvar_data.csv
+   python data_import.py --file path_to_your_clinvar_data.csv
 
 ## Usage
 
