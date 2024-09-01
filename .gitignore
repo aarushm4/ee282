@@ -1,4 +1,4 @@
 
 /gene-sequence/gene-sequence
 /gene-sequence/.venv
-.venv
+/**/venv
