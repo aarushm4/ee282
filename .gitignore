@@ -3,3 +3,7 @@
 **/**/.venv
 /**/**.vcf
 /cancer-patient-support/front-end/node_modules
+cancer-patient-support/api/outcome_prediction_model.joblib
+cancer-patient-support/api/recommendation_model.joblib
+cancer-patient-support/api/sentiment_analysis_model.joblib
+cancer-patient-support/api/sentiment_vectorizer.joblib
