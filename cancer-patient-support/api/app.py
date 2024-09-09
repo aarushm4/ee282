@@ -1,5 +1,6 @@
 import requests
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -12,16 +13,33 @@ from sklearn.neighbors import NearestNeighbors
 import joblib
 import os
 import random
+import json
 
 app = Flask(__name__)
+CORS(app)
 
-NCI_API_BASE_URL = "https://clinicaltrialsapi.cancer.gov/v1/"
+NCI_API_BASE_URL = "https://clinicaltrialsapi.cancer.gov/api/v2/"
+
+headers = {
+    'X-API-KEY': '67NVt1J4W7a0bLNPyrBZTBiUrOnA19v1plT2mIOi'
+}
+
+def convert_int64_to_int(data):
+    """ Recursively convert int64 values to int. """
+    if isinstance(data, dict):
+        return {k: convert_int64_to_int(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [convert_int64_to_int(i) for i in data]
+    elif isinstance(data, np.int64):
+        return int(data)
+    else:
+        return data
 
 # Expanded mock patient data
 MOCK_PATIENT_DATA = pd.DataFrame({
     'patient_id': range(1000),
     'age': np.random.randint(20, 80, 1000),
-    'cancer_type': np.random.choice(['breast', 'lung', 'colon', 'prostate', 'melanoma'], 1000),
+    'cancer_type': np.random.choice(['breast cancer', 'lung', 'colon', 'prostate', 'melanoma'], 1000),
     'stage': np.random.choice(['I', 'II', 'III', 'IV'], 1000),
     'treatment': np.random.choice(['chemotherapy', 'radiation', 'surgery', 'immunotherapy'], 1000),
     'outcome': np.random.choice(['improved', 'stable', 'deteriorated'], 1000),
@@ -57,28 +75,33 @@ MOCK_WEARABLE_DATA = pd.concat(
 
 def get_clinical_trials(cancer_type, zip_code):
     params = {
-        "disease.name": cancer_type,
+        "brief_title._fulltext": cancer_type,  # Updated parameter names according to hypothetical v2 changes
         "sites.org_postal_code": zip_code,
-        "record_verification_date_gte": datetime.now().strftime("%Y-%m-%d"),
         "current_trial_status": "Active",
-        "size": 10
+        "current_trial_status_date_lte": datetime.now().strftime("%Y-%m-%d"),  # Example of possible new parameter for record verification date
+        "size": 10  # Assuming 'size' might be renamed to 'limit'
     }
+    
     response = requests.get(
-        NCI_API_BASE_URL + "clinical-trials", params=params)
+        NCI_API_BASE_URL + "trials", headers=headers, params=params)
+
+    
     if response.status_code == 200:
-        return response.json().get('trials', [])
+        return response.json().get('data', [])
     else:
         return []
 
 
 def get_treatment_info(cancer_type):
     params = {
-        "query": f"{cancer_type} treatment",
+        "query": f"{cancer_type}",
         "size": 5
     }
-    response = requests.get(NCI_API_BASE_URL + "resources", params=params)
+    
+    response = requests.get(NCI_API_BASE_URL + "interventions", headers=headers, params=params)
+
     if response.status_code == 200:
-        return response.json().get('results', [])
+        return response.json().get('data', [])
     else:
         return []
 
@@ -270,19 +293,19 @@ def patient_dashboard():
     patient_id = request.args.get('patient_id')
     if not patient_id:
         return jsonify({"error": "patient_id is required"}), 400
+    
 
     patient_data = MOCK_PATIENT_DATA[MOCK_PATIENT_DATA['patient_id'] == int(
         patient_id)].iloc[0]
 
-    clinical_trials = get_clinical_trials(patient_data['cancer_type'], '90210')[
+    clinical_trials = get_clinical_trials(patient_data['cancer_type'], '21202')[
         :3]  # Using a mock ZIP code
-    treatment_info = get_treatment_info(patient_data['cancer_type'])[:3]
+    treatment_info = get_treatment_info(patient_data['cancer_type'])
     outcome_prediction = predict_outcome(
         pd.DataFrame([patient_data.to_dict()]))
-
     recent_feedback = MOCK_FEEDBACK_DATA[MOCK_FEEDBACK_DATA['patient_id'] == int(
         patient_id)].iloc[-1]['feedback']
-    sentiment_analysis = analyze_sentiment(recent_feedback)
+    # sentiment_analysis = analyze_sentiment(recent_feedback)
 
     treatment_recommendations = get_treatment_recommendations(
         pd.DataFrame([patient_data.to_dict()]))
@@ -294,16 +317,17 @@ def patient_dashboard():
         "treatment_info": treatment_info,
         "outcome_prediction": outcome_prediction,
         "recent_feedback": recent_feedback,
-        "sentiment_analysis": sentiment_analysis,
+        "sentiment_analysis": '',
         "treatment_recommendations": treatment_recommendations,
-        "wearable_data_analysis": wearable_analysis
+        "wearable_data_analysis": convert_int64_to_int(wearable_analysis)
     }
 
     return jsonify(dashboard)
 
+# All other functions for data processing and model training...
 
-@app.before_first_request
-def initialize_models():
+with app.app_context():
+    # Train or load models upon the first request to the application
     if not os.path.exists('outcome_prediction_model.joblib'):
         train_outcome_prediction_model()
     if not os.path.exists('sentiment_analysis_model.joblib'):
@@ -311,6 +335,9 @@ def initialize_models():
     if not os.path.exists('recommendation_model.joblib'):
         train_recommendation_model()
 
+
+
+        
 
 if __name__ == '__main__':
     app.run(debug=True)

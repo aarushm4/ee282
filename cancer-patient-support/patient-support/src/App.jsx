@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Switch, Link } from 'react-router-dom';
-import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { Dashboard } from './components/Dashboard';
+
+const randomIntFromInterval = (min, max) => {
+  // min and max included
+  return Math.floor(Math.random() * (max - min + 1) + min);
+};
 
 const App = () => {
+  const patientid = randomIntFromInterval(1, 1000);
   return (
     <Router>
       <div className='min-h-screen bg-gray-100'>
@@ -16,7 +22,7 @@ const App = () => {
         </nav>
         <Switch>
           <Route exact path='/'>
-            <Dashboard patientId={1} /> {/* For demo purposes, we're using a fixed patient ID */}
+            <Dashboard patientId={patientid} /> {/* For demo purposes, we're using a fixed patient ID */}
           </Route>
           {/* Add more routes here as needed */}
         </Switch>
