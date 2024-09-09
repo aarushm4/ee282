@@ -72,6 +72,24 @@ def generate_wearable_data(patient_id, days=30):
 MOCK_WEARABLE_DATA = pd.concat(
     [generate_wearable_data(i) for i in range(1000)])
 
+def get_trials(cancer_type, zip_code):
+    query = request.args.get('query', '')
+    status = request.args.get('status', 'active')
+    search_url = f"{NCI_API_BASE_URL}/trials?query={query}&status={status}"
+    
+    response = requests.get(search_url, headers=headers)
+    print('data', response)
+    data = response.json()
+    # Extracting treatment details
+    trials = data['trials']
+    for trial in trials:
+        # Get detailed information about each trial
+        trial_id = trial['id']
+        detail_response = requests.get(f"{BASE_URL}/trials/{trial_id}")
+        trial_data = detail_response.json()
+        trial['interventions'] = trial_data.get('interventions', [])
+    
+    return jsonify(trials)
 
 def get_clinical_trials(cancer_type, zip_code):
     params = {
@@ -81,10 +99,8 @@ def get_clinical_trials(cancer_type, zip_code):
         "current_trial_status_date_lte": datetime.now().strftime("%Y-%m-%d"),  # Example of possible new parameter for record verification date
         "size": 10  # Assuming 'size' might be renamed to 'limit'
     }
-    
     response = requests.get(
         NCI_API_BASE_URL + "trials", headers=headers, params=params)
-
     
     if response.status_code == 200:
         return response.json().get('data', [])
@@ -165,7 +181,7 @@ def analyze_sentiment(feedback):
 
     feedback_vector = vectorizer.transform([feedback])
     sentiment = model.predict_proba(feedback_vector)[0]
-    return {"positive_sentiment_probability": sentiment[1]}
+    return {"positive_sentiment_probability": sentiment[0]}
 
 
 def train_recommendation_model():
@@ -224,7 +240,6 @@ def analyze_wearable_data(patient_id):
     }
 
     return analysis
-
 
 @app.route('/api/clinical-trials', methods=['GET'])
 def clinical_trials():
@@ -294,18 +309,18 @@ def patient_dashboard():
     if not patient_id:
         return jsonify({"error": "patient_id is required"}), 400
     
-
     patient_data = MOCK_PATIENT_DATA[MOCK_PATIENT_DATA['patient_id'] == int(
         patient_id)].iloc[0]
 
     clinical_trials = get_clinical_trials(patient_data['cancer_type'], '21202')[
-        :3]  # Using a mock ZIP code
+        :3]  
+    # print('trials', get_trials(patient_data['cancer_type'], '21202')[:3])
     treatment_info = get_treatment_info(patient_data['cancer_type'])
     outcome_prediction = predict_outcome(
         pd.DataFrame([patient_data.to_dict()]))
     recent_feedback = MOCK_FEEDBACK_DATA[MOCK_FEEDBACK_DATA['patient_id'] == int(
         patient_id)].iloc[-1]['feedback']
-    # sentiment_analysis = analyze_sentiment(recent_feedback)
+    sentiment_analysis = analyze_sentiment(recent_feedback)
 
     treatment_recommendations = get_treatment_recommendations(
         pd.DataFrame([patient_data.to_dict()]))
@@ -317,7 +332,7 @@ def patient_dashboard():
         "treatment_info": treatment_info,
         "outcome_prediction": outcome_prediction,
         "recent_feedback": recent_feedback,
-        "sentiment_analysis": '',
+        "sentiment_analysis": sentiment_analysis,
         "treatment_recommendations": treatment_recommendations,
         "wearable_data_analysis": convert_int64_to_int(wearable_analysis)
     }

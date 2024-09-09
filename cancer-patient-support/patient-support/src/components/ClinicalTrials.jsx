@@ -5,7 +5,7 @@ export const ClinicalTrials = ({ trials }) => (
       {trials.map((trial, index) => (
         <li key={index} className='mb-2'>
           <a href={trial.link} target='_blank' rel='noopener noreferrer' className='text-blue-500 hover:underline'>
-            {trial.title}
+            {trial.official_title}
           </a>
         </li>
       ))}

@@ -20,8 +20,9 @@ export const Dashboard = ({ patientId }) => {
         console.error('Error fetching dashboard data:', error);
       }
     };
-
-    fetchDashboardData();
+    if (patientId > 0) {
+      fetchDashboardData();
+    }
   }, [patientId]);
 
   if (!dashboardData) return <div className='text-center'>Loading...</div>;
